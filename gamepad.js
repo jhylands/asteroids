@@ -20,17 +20,18 @@ function deactivateGamepad()
 
 function updateGamepad()
 {
+    var move = new THREE.Vector3();
     var gamepad = navigator.getGamepads()[0];
     var threshold = 0.15;
     
     if(gamepad.axes[0] < -(threshold)) 
-    { playerCamera.position.sub(axisZ); } 
+    { move.set(0, 0, -1);}
     else if(gamepad.axes[0] > threshold) 
-    { playerCamera.position.add(axisZ); }
+    { move.set(0, 0, 1);}
     else if(gamepad.axes[1] < -(threshold))
-    { playerCamera.position.y += 2; }
+    { move.set(0, 1, 0);}
     else if(gamepad.axes[1] > threshold) 
-    { playerCamera.position.y -= 2; }
+    { move.set(0, -1, 0);}
     
     /*if(gamepad.axes[2] < -(threshold))
     { cameraX += 0.1; }
@@ -42,7 +43,7 @@ function updateGamepad()
     { cameraY -= 0.1; }*/
     
     var angleUp = -gamepad.axes[2] / 50;
-    var angleRight = gamepad.axes[5] / 50;
+    var angleRight = gamepad.axes[3] / 50;
     
     //axisZ.applyAxisAngle(axisY, angleUp);
     //playerCamera.rotateOnAxis(axisY, angleUp);
@@ -58,4 +59,7 @@ function updateGamepad()
     
     rotMatrix.multiply(rotationY).multiply(rotationZ);
     playerCamera.rotation.setFromRotationMatrix(rotMatrix);
+    
+    move.applyMatrix4(rotMatrix);
+    playerCamera.position.add(move);
 };
