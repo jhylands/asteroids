@@ -2,15 +2,23 @@
 var renderer, scene, camera, pointLight, spotLight;
 
 // Player globals
-var player;
+//var player;
+var obj;
 
-var cameraX = 0;
-var cameraY = 0;
+// Camera globals
+var rotMatrix = new THREE.Matrix4().identity();
+var axisY = new THREE.Vector3(0, 1, 0);
+var axisZ = new THREE.Vector3(0, 0, 1);
 
 function setup()
 {
+    // Set scene up 
     createScene();
+    
+    // Initialises gamepad
     init();
+    
+    // Renders scene
     draw();
 }
 
@@ -31,8 +39,9 @@ function createScene()
     scene = new THREE.Scene();
     
     // Add camera to scene and move it backwards
-    scene.add(camera);
-    camera.position.z = 320;
+    //scene.add(camera);
+    camera.position.x = -10;
+    camera.position.y = 3;
     
     // Start renderer
     renderer.setSize(width, height);
@@ -40,14 +49,46 @@ function createScene()
     // Attach DOM element (canvas)
     canvas.appendChild(renderer.domElement);
     
-    // Create test player and add to scene
-    var radius = 50, segments = 50, rings = 50;
-    player = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), new THREE.MeshLambertMaterial({color: 0xD43001}));
-    scene.add(player);
-    player.position.x = 0;
-    player.position.y = 0;
-    player.receiveShadow = true;
-    player.castShadow = true;
+    playerCamera = new THREE.Object3D();
+    playerCamera.add(camera);
+    
+    var loader = new THREE.ObjectLoader();
+    loader.load("models/ship.js", function ( obj1 ) {
+		var material = new THREE.MeshPhongMaterial( {
+					color: 0xdddddd,
+					specular: 0x222222,
+					shininess: 35,
+					map: THREE.ImageUtils.loadTexture( "images/shell.jpg" ),
+					normalMap: THREE.ImageUtils.loadTexture( "images/shell.jpg" ),
+					normalScale: new THREE.Vector2( 0.8, 0.8 ),
+                                        side: THREE.DoubleSide
+				} );
+     obj1.children[4].children[0].material = material;
+     obj1.children[4].children[1].material = material;
+     obj1.children[4].children[2].material = material;
+     obj1.children[0].material = material;
+     obj1.children[1].material = material;
+     obj1.children[2].material = material;
+     obj1.children[5].material = material;
+     obj1.children[6].material = new THREE.MeshBasicMaterial({color:0x0000ff});
+     obj=obj1;
+                                                     playerCamera.add(obj)});
+    
+    //playerCamera.add(player);
+    scene.add(playerCamera);
+    
+    var asteroidLoader = new THREE.ObjectLoader();
+    asteroidLoader.load("models/asteroidScene.js", function (asteroid){
+        asteroid.children[1].material = new THREE.MeshLambertMaterial({
+                color: 0xdddddd,
+                                            specular: 0x222222,
+                                            shininess: 35,
+                map: THREE.ImageUtils.loadTexture( "images/asteroid.jpg" ),
+                normalMap: THREE.ImageUtils.loadTexture( "images/asteroid-normal.png" ),
+                                            normalScale: new THREE.Vector2( 0.8, 0.8 ),
+                                            side: THREE.DoubleSide});
+        scene.add(asteroid);
+    });
     
     // Create a point light and add to scene
     pointLight = new THREE.PointLight(0xF8D898);
@@ -65,6 +106,7 @@ function createScene()
     spotLight.castShadow = true;
     scene.add(spotLight);
     
+    // Skybox
     var imagePrefix = "images/nebula-";
     var directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
     var imageSuffix = ".png";
@@ -75,15 +117,16 @@ function createScene()
     var textureCube = THREE.ImageUtils.loadTextureCube( imageURLs );
     var shader = THREE.ShaderLib[ "cube" ];
     shader.uniforms[ "tCube" ].value = textureCube;
-    var skyMaterial = new THREE.ShaderMaterial( {
+    var skyMaterial = new THREE.ShaderMaterial( 
+        {
             fragmentShader: shader.fragmentShader,
             vertexShader: shader.vertexShader,
             uniforms: shader.uniforms,
             depthWrite: false,
             side: THREE.BackSide
-    } ); 
-    var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
-    scene.add( skyBox );
+        }); 
+    var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
+    scene.add(skyBox);
 }
 
 function draw()
@@ -92,7 +135,9 @@ function draw()
     renderer.render(scene, camera);
     // Loop call
     requestAnimationFrame(draw);
+    // Updates camera position
     graphicsUpdate();
+    // Updates player position
     playerMovement();
 }
 
@@ -106,7 +151,15 @@ function playerMovement()
 
 function graphicsUpdate()
 {
-    var oD = 100;
-    camera.position.set(oD * Math.cos(cameraX), Math.cos(cameraX) * Math.cos(cameraY), Math.sin(cameraX) * Math.sin(cameraY));
-    camera.lookAt(player.position);
-}
+    //playerCamera.rotation.x = cameraX;
+    //playerCamera.rotation.y = cameraY;
+    //var axisX = new THREE.Vector3(1, 0, 0);
+    //var axisY = new THREE.Vector3(0, 1, 0);
+    //camera.position.applyAxisAngle(axisX, cameraX);
+    //camera.position.applyAxisAngle(axisY, cameraY);
+    //cameraX = 0;
+    //cameraY = 0;
+    //var orbitalDistance = 100;
+    //camera.position.set(orbitalDistance * Math.cos(cameraX) * Math.sin(cameraY), orbitalDistance * Math.sin(cameraX) * Math.sin(cameraY), orbitalDistance * Math.cos(cameraY));
+    camera.lookAt(new THREE.Vector3(0,0,0));
+}	
