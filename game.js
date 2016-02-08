@@ -1,5 +1,5 @@
 // Scene object globals
-var renderer, scene, camera, pointLight, spotLight;
+var renderer, scene, camera, pointLight, spotLight, asteroid;
 
 // Player globals
 //var player;
@@ -28,13 +28,14 @@ function createScene()
     var width = 640, height = 360;
     
     // Set camera
-    var view_angle = 50, aspect = width/height, near = 0.1, far = 10000;
+    var view_angle = 50, aspect = width/height, near = 0.1, far = 1000000000;
     
     // Get canvas 
     var canvas = document.getElementById("gameCanvas");
     
     // Create WebGL renderer, camera and scene
     renderer = new THREE.WebGLRenderer();
+    renderer.shadowMapEnabled = true;
     camera = new THREE.PerspectiveCamera(view_angle, aspect, near, far);
     scene = new THREE.Scene();
     
@@ -78,15 +79,20 @@ function createScene()
     scene.add(playerCamera);
     
     var asteroidLoader = new THREE.ObjectLoader();
-    asteroidLoader.load("models/asteroidScene.js", function (asteroid){
+    asteroidLoader.load("models/asteroidScene.js", function (asteroidload){
+	asteroid = asteroidload;
         asteroid.children[1].material = new THREE.MeshLambertMaterial({
                 color: 0xdddddd,
                                             specular: 0x222222,
                                             shininess: 35,
                 map: THREE.ImageUtils.loadTexture( "images/asteroid.jpg" ),
-                normalMap: THREE.ImageUtils.loadTexture( "images/asteroid-normal.png" ),
-                                            normalScale: new THREE.Vector2( 0.8, 0.8 ),
-                                            side: THREE.DoubleSide});
+                normalMap: THREE.ImageUtils.loadTexture( "images/F1fBm.jpg" ),
+                                            normalScale: new THREE.Vector2( 0.8, 0.8 )});
+	asteroid.children[1].material.map.wrapS = THREE.RepeatWrapping;
+	asteroid.children[1].material.map.wrapT = THREE.RepeatWrapping;
+	asteroid.children[1].material.map.repeat.set(200,200);
+	asteroid.children[1].castShadow = true;
+	asteroid.children[1].receiveShadow = true;
         scene.add(asteroid);
     });
     
@@ -110,7 +116,7 @@ function createScene()
     var imagePrefix = "images/nebula-";
     var directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
     var imageSuffix = ".png";
-    var skyGeometry = new THREE.CubeGeometry( 500, 500, 500 );
+    var skyGeometry = new THREE.CubeGeometry( 500000000, 500000000, 500000000 );
     var imageURLs = [];
     for (var i = 0; i < 6; i++)
             imageURLs.push( imagePrefix + directions[i] + imageSuffix );
@@ -143,14 +149,19 @@ function draw()
 
 function playerMovement()
 {
-    if (isGamepadActive)
+    /*if (isGamepadActive)
     {
         updateGamepad();
-    }
+    }else{*/
+	updateKeyboard();
+    //}
 }
 
 function graphicsUpdate()
 {
+    asteroid.children[1].rotation.x+=0.01;
+    //asteroid.children[1].rotation.y+=0.005;
+    //asteroid.children[1].rotation.z+=0.015;
     //playerCamera.rotation.x = cameraX;
     //playerCamera.rotation.y = cameraY;
     //var axisX = new THREE.Vector3(1, 0, 0);
