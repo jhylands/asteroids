@@ -25,13 +25,15 @@ function updateGamepad()
     var threshold = 0.15;
     
     if(gamepad.axes[0] < -(threshold)) 
-    { move.set(0, 0, -1);}
+    {move.set(0, 0, -1);}
     else if(gamepad.axes[0] > threshold) 
-    { move.set(0, 0, 1);}
+    {move.set(0, 0, 1);}
     else if(gamepad.axes[1] < -(threshold))
-    { move.set(0, 1, 0);}
+    {move.set(0, 1, 0);}
     else if(gamepad.axes[1] > threshold) 
-    { move.set(0, -1, 0);}
+    {move.set(0, -1, 0);}
+    else if(gamepad.buttons[7].pressed)
+    {move.set(1, 0, 0);}
     
     /*if(gamepad.axes[2] < -(threshold))
     { cameraX += 0.1; }
@@ -61,5 +63,17 @@ function updateGamepad()
     playerCamera.rotation.setFromRotationMatrix(rotMatrix);
     
     move.applyMatrix4(rotMatrix);
-    playerCamera.position.add(move);
+    playerCamera.position.add(move);    
+    
+    if(gamepad.buttons[5].pressed)
+    {
+        /*beamIndex = beams.length;
+        beams[beamIndex] = new THREE.Mesh(new THREE.MeshBasicMaterial({color: 0xFF0000}), new THREE.CylinderGeometry(0.1, 0.1, 1));
+        beams[beamIndex].position = playerCamera.position;
+        beams[beamIndex].rotation.setFromRotationMatrix(rotMatrix);
+        scene.add(beams[beamIndex]);*/
+        blength = bullit.length;
+        bullit[blength] = createBullit(playerCamera.position,true);
+	scene.add(bullit[blength].object);
+    }
 };

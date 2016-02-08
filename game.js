@@ -4,6 +4,8 @@ var renderer, scene, camera, pointLight, spotLight, asteroid;
 // Player globals
 //var player;
 var obj;
+//var beams = new Array();
+var bullit = new Array();
 
 // Camera globals
 var rotMatrix = new THREE.Matrix4().identity();
@@ -173,4 +175,58 @@ function graphicsUpdate()
     //var orbitalDistance = 100;
     //camera.position.set(orbitalDistance * Math.cos(cameraX) * Math.sin(cameraY), orbitalDistance * Math.sin(cameraX) * Math.sin(cameraY), orbitalDistance * Math.cos(cameraY));
     camera.lookAt(new THREE.Vector3(0,0,0));
-}	
+    //updateBeams();
+    moveBullits(bullit);
+}
+
+function updateBeams()
+{
+    for (i = 0; i < beams.length; i++)
+    {
+        beams[i].position.add(beams[i].rotation);
+    }
+}
+
+function createBullit(position,GBD){
+	//GBD is a bool true is the user false is alian
+	//define the bullit variable
+	var bullits = new Object();
+	bullits.velocity = new THREE.Vector3(1, 0, 0).applyMatrix4(rotMatrix);
+	//bullits.velocity.applyMatrix4(rotMatrix);
+	//get weather the bullit should be shown
+	bullits.shown = true;
+	//the z componet is defines after the if GBD
+	var Geometry = new THREE.CylinderGeometry(0.1,0.1,1);
+	if(!GBD){
+            //set the bullits coming towards you
+            bullits.velocity.z=1;
+            //set the color
+            var Material = new THREE.MeshBasicMaterial( { color:0xFF0000,transparent:true,opacity:0.8  } );
+            //set them as alian
+            bullits.own = false;
+	}else{
+            //set the bullits going away from you
+            bullits.velocity.z=-1;
+            //set the color
+            var Material = new THREE.MeshBasicMaterial( { color:0x00FFFF ,transparent:true,opacity:0.8} );
+            bullits.own = true;
+	}
+	bullits.object = new THREE.Mesh( Geometry,Material );
+	bullits.object.position.set(position.x,position.y,position.z+1);
+	bullits.object.rotation.setFromRotationMatrix(rotMatrix);
+	//the object is not yet added
+	return bullits;
+	}
+        
+    function moveBullits(bullits){
+            for(i=0;i<bullits.length;i++){
+                    bullits[i].object.position.add(bullits[i].velocity);
+            }
+	}
+        
+        function UpdatePosition(asteroid){
+            asteroid.object.position.x+=asteroid.velocity.x;
+            asteroid.object.position.y+=asteroid.velocity.y;
+            asteroid.object.position.z+=asteroid.velocity.z;
+	}
+
