@@ -1,5 +1,5 @@
 // Scene object globals
-var renderer, scene, camera, pointLight, spotLight, asteroid;
+var renderer, scene, camera, pointLight, spotLight, asteroid, asteroidb;
 
 // Player globals
 //var player;
@@ -55,6 +55,17 @@ function createScene()
     playerCamera = new THREE.Object3D();
     playerCamera.add(camera);
     
+
+//---------------
+//LOD
+//
+    asteroidb = new THREE.LOD();
+    var geometry1 = new THREE.IcosahedronGeometry( 10, 5);
+    var astMaterial = new THREE.MeshLambertMaterial({color:0xcccccc});
+    var basicAsteroid = new THREE.Mesh(geometry1,astMaterial);
+    asteroidb.addLevel(basicAsteroid,400);
+    scene.add(asteroidb);
+
     var loader = new THREE.ObjectLoader();
     loader.load("models/ship.js", function ( obj1 ) {
 		var material = new THREE.MeshPhongMaterial( {
@@ -83,36 +94,29 @@ function createScene()
     scene.add(playerCamera);
     
     var asteroidLoader = new THREE.ObjectLoader();
-    asteroidLoader.load("models/asteroidScene.js", function (asteroidload){
+    asteroidLoader.load("models/asteroidSceneK.js", function (asteroidload){
 	asteroid = asteroidload;
-        asteroid.children[1].material = new THREE.MeshLambertMaterial({
-                color: 0xdddddd,
-                                            specular: 0x222222,
-                                            shininess: 35,
-                map: THREE.ImageUtils.loadTexture( "images/asteroid.jpg" ),
-                normalMap: THREE.ImageUtils.loadTexture( "images/F1fBm.jpg" ),
-                                            normalScale: new THREE.Vector2( 0.8, 0.8 )});
-	asteroid.children[1].material.map.wrapS = THREE.RepeatWrapping;
-	asteroid.children[1].material.map.wrapT = THREE.RepeatWrapping;
-	asteroid.children[1].material.map.repeat.set(200,200);
+//	asteroid.children[1].material.map.wrapS = THREE.RepeatWrapping;
+//	asteroid.children[1].material.map.wrapT = THREE.RepeatWrapping;
+//	asteroid.children[1].material.map.repeat.set(4,4);
 	asteroid.children[1].castShadow = true;
 	asteroid.children[1].receiveShadow = true;
-        scene.add(asteroid);
+        asteroidb.addLevel(asteroid.children[1],10);
     });
     
     // Create a point light and add to scene
-    pointLight = new THREE.PointLight(0xF8D898);
+    pointLight = new THREE.PointLight(0xcccccc);
     pointLight.position.x = -1000;
     pointLight.position.y = 0;
     pointLight.position.z = 1000;
     pointLight.intensity = 2.9;
     pointLight.distance = 10000;
-    scene.add(pointLight);
+//    scene.add(pointLight);
 		
     // Add a spot light to cast shadows
     spotLight = new THREE.SpotLight(0xF8D898);
     spotLight.position.set(0, 0, 460);
-    spotLight.intensity = 1.5;
+    spotLight.intensity = 1;
     spotLight.castShadow = true;
     spotLight.shadowMapWidth = 4096;
     spotLight.shadowMapHeight = 4096;
@@ -165,6 +169,7 @@ function playerMovement()
 
 function graphicsUpdate()
 {
+    asteroidb.update(playerCamera.children[0]);
     asteroid.children[1].rotation.x+=0.01;
     //asteroid.children[1].rotation.y+=0.005;
     //asteroid.children[1].rotation.z+=0.015;
