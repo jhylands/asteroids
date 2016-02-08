@@ -69,6 +69,8 @@ function createScene()
      obj1.children[4].children[0].material = material;
      obj1.children[4].children[1].material = material;
      obj1.children[4].children[2].material = material;
+     obj1.children[4].castShadow = true;
+     obj1.children[4].receiveShadow = true;
      obj1.children[0].material = material;
      obj1.children[1].material = material;
      obj1.children[2].material = material;
@@ -112,6 +114,8 @@ function createScene()
     spotLight.position.set(0, 0, 460);
     spotLight.intensity = 1.5;
     spotLight.castShadow = true;
+    spotLight.shadowMapWidth = 4096;
+    spotLight.shadowMapHeight = 4096;
     scene.add(spotLight);
     
     // Skybox
